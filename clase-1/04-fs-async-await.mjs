@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises"
+import { readFile } from 'node:fs/promises'
 
 console.log('Leyendo el primer archivo...')
 const text = await readFile('./02-text.txt', 'utf-8')

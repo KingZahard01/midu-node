@@ -1,4 +1,4 @@
-const fs = require("node:fs/promises");
+const fs = require('node:fs/promises')
 // const fs = require("node:fs");
 
 // fs.readdir(".", (err, files) => {
@@ -12,15 +12,14 @@ const fs = require("node:fs/promises");
 //   });
 // });
 
-fs.readdir(".")
+fs.readdir('.')
   .then((files) => {
     files.forEach((file) => {
-      console.log(file);
-    });
+      console.log(file)
+    })
   })
-  .catch((error) => {
+  .catch((err) => {
     if (err) {
-      console.log("Error al leer el directorio: ", err);
-      return;
+      console.log('Error al leer el directorio: ', err)
     }
-  });
+  })

@@ -1,0 +1,35 @@
+{
+  "name": "midu-nodejs",
+  "version": "1.0.0",
+  "description": "El mejor curso de nodejs de midudev",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KingZahard01/midu-node.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "curso",
+    "javascript",
+    "midudev"
+  ],
+  "author": "Juan José García",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KingZahard01/midu-node/issues"
+  },
+  "homepage": "https://github.com/KingZahard01/midu-node#readme",
+  "dependencies": {
+    "picocolors": "1.1.1"
+  },
+  "devDependencies": {
+    "standard": "^17.1.2"
+  },
+  "eslintConfig": {
+    "extends": "standard"
+  }
+}
