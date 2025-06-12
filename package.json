@@ -16,8 +16,5 @@
   "bugs": {
     "url": "https://github.com/KingZahard01/midu-node/issues"
   },
-  "homepage": "https://github.com/KingZahard01/midu-node#readme",
-  "devDependencies": {
-    "standard": "^17.1.2"
-  }
+  "homepage": "https://github.com/KingZahard01/midu-node#readme"
 }
