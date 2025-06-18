@@ -6,23 +6,22 @@ const { validateMovie, validatePartialMovie } = require('./schemes/movies.js');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const ACCEPTED_ORIGINS = [
+        'http://localhost:8080',
+        'https://example.com',
+        'https://myapp.com',
+      ];
+    },
+  }),
+);
 app.disable('x-powered-by'); // deshabilita el header x-powered-by: express
-
-const ACCEPTED_ORIGINS = [
-  'http://localhost:8080',
-  'https://example.com',
-  'https://myapp.com',
-];
 
 // GET
 // Todos los recursos que sean MOVIES se indentifica con /movies
 app.get('/movies', (req, res) => {
-  const origin = req.header('origin');
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin); // Permite el acceso desde el origen especificado
-  }
-
   const { genre } = req.query;
   if (genre) {
     const filteredMovies = movies.filter(movie =>
@@ -66,11 +65,6 @@ app.post('/movies', (req, res) => {
 
 // PATCH
 app.patch('/movies/:id', (req, res) => {
-  const result = validatePartialMovie(req.body);
-  if (!result.success) {
-    return res.status(400).json({ error: JSON.parse(result.error.message) });
-  }
-
   const { id } = req.params;
   const movieIndex = movies.findIndex(movie => movie.id === id);
 
@@ -90,11 +84,6 @@ app.patch('/movies/:id', (req, res) => {
 
 // DELETE
 app.delete('/movies/:id', (req, res) => {
-  const origin = req.header('origin');
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin); // Permite el acceso desde el origen especificado
-  }
-
   const { id } = req.params;
   const movieIndex = movies.findIndex(movie => movie.id === id);
 
