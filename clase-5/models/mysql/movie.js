@@ -1,84 +1,100 @@
-import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
-const uri =
-  'mongodb+srv://user:???@cluster0.dhwmu.mongodb.net/?retryWrites=true&w=majority';
+import mysql from 'mysql2/promise';
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const config = {
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'password',
+  database: 'moviesdb',
+};
 
-async function connect() {
-  try {
-    await client.connect();
-    const database = client.db('database');
-    return database.collection('movies');
-  } catch (error) {
-    console.error('Error connecting to the database');
-    console.error(error);
-    await client.close();
-  }
-}
+const connection = await mysql.createConnection(config);
 
 export class MovieModel {
   static async getAll({ genre }) {
-    const db = await connect();
-
     if (genre) {
-      return db
-        .find({
-          genre: {
-            $elemMatch: {
-              $regex: genre,
-              $options: 'i',
-            },
-          },
-        })
-        .toArray();
+      const lowerGenre = genre.toLowerCase();
+
+      // get genre ids from database table using genre names
+      const [genres] = await connection.query(
+        'SELECT id, name FROM genre WHERE LOWER(name) = ?;',
+        [lowerGenre],
+      );
+
+      // no genre found
+      if (genres.length === 0) return [];
+
+      // get the id from the first genre result
+      const [{ id }] = genres;
+
+      // get all movies ids from database table
+      // la query a movie_genre
+      // join
+      // y devolver los resultados
+      return [];
     }
 
-    return db.find({}).toArray();
+    const [movies] = await connection.query(
+      'SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie;',
+    );
+    return movies;
   }
 
   static async getById({ id }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-    return db.findOne({ _id: objectId });
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id 
+        FROM movie WHERE id = UUID_TO_BIN(?);`,
+      [id],
+    );
+
+    if (movies.length === 0) return null;
+    return movies[0];
   }
 
   static async create({ input }) {
-    const db = await connect();
+    const {
+      title,
+      year,
+      director,
+      duration,
+      poster,
+      rate,
+      genre: genreInput, // genre is an array
+    } = input;
 
-    const { insertedId } = await db.insertOne(input);
+    // TODO: crear la conexion de genre
 
-    return {
-      id: insertedId,
-      ...input,
-    };
+    // inser movie
+    const [uuidResult] = await connection.query('SELECT UUID() uuid;');
+    const [{ uuid }] = uuidResult;
+
+    try {
+      await connection.query(
+        `INSERT INTO movie (id, title, year, director, duration, poster, rate) 
+        VALUES (UUID_TO_BIN(?), ?, ?, ?, ?, ?, ?);`,
+        [uuid, title, year, director, duration, poster, rate],
+      );
+    } catch (e) {
+      // puede enviar informacion sensible al usuario
+      throw new Error('Error al crear la película');
+      // Enviar la trza a un servicio de interno
+      // sendLog(e)
+    }
+
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id 
+        FROM movie WHERE id = UUID_TO_BIN(?);`,
+      [uuid],
+    );
+
+    return movies[0];
   }
 
   static async delete({ id }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-    const { deletedCount } = await db.deleteOne({ _id: objectId });
-    return deletedCount > 0;
+    // crear el delete
   }
 
   static async update({ id, input }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-
-    const { ok, value } = await db.findOneAndUpdate(
-      { _id: objectId },
-      { $set: input },
-      { returnNewDocument: true },
-    );
-
-    if (!ok) return false;
-
-    return value;
+    // crear el update
   }
 }
